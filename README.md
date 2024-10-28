@@ -1,0 +1,2 @@
+# CounterMaciejBanka
+Licznik
