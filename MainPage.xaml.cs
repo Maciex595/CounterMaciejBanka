@@ -1,12 +1,8 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
 namespace Counter
 {
     public partial class MainPage : ContentPage
     {
-        public ObservableCollection<Counter> Counters { get; } = new ObservableCollection<Counter>();
+        public List<Counter> Counters { get; } = new List<Counter>();
 
         public MainPage()
         {
@@ -16,66 +12,55 @@ namespace Counter
 
         private void OnAddCounterClicked(object sender, EventArgs e)
         {
-            string counterName = CounterNameEntry.Text;
-            if (!string.IsNullOrEmpty(counterName) && !Counters.Any(c => c.Name == counterName))
+            string name = CounterNameEntry.Text;
+            if (!string.IsNullOrEmpty(name))
             {
-                Counters.Add(new Counter(counterName));
-                CounterNameEntry.Text = string.Empty;
+                Counters.Add(new Counter(name));
+                CounterNameEntry.Text = "";
+                CounterListView.ItemsSource = null;
+                CounterListView.ItemsSource = Counters;
             }
         }
 
         private void OnIncreaseClicked(object sender, EventArgs e)
         {
-            UpdateCounter(sender, 1);
+            if (sender is Button button && button.CommandParameter is string name)
+            {
+                var counter = Counters.FirstOrDefault(c => c.Name == name);
+                if (counter != null)
+                {
+                    counter.Count++;
+                    CounterListView.ItemsSource = null;
+                    CounterListView.ItemsSource = Counters;
+                }
+            }
         }
 
         private void OnDecreaseClicked(object sender, EventArgs e)
         {
-            UpdateCounter(sender, -1);
-        }
-
-        private void UpdateCounter(object sender, int delta)
-        {
-            if (sender is Button button && button.CommandParameter is string counterName)
+            if (sender is Button button && button.CommandParameter is string name)
             {
-                var counter = Counters.FirstOrDefault(c => c.Name == counterName);
+                var counter = Counters.FirstOrDefault(c => c.Name == name);
                 if (counter != null)
                 {
-                    counter.Count += delta;
+                    counter.Count--;
+                    CounterListView.ItemsSource = null;
+                    CounterListView.ItemsSource = Counters;
                 }
             }
         }
     }
 
-    public class Counter : INotifyPropertyChanged
+    public class Counter
     {
-        private int _count;
-
         public string Name { get; }
-
-        public int Count
-        {
-            get => _count;
-            set
-            {
-                _count = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(DisplayText));
-            }
-        }
+        public int Count { get; set; }
+        public string DisplayText => $"Licznik '{Name}': {Count}";
 
         public Counter(string name)
         {
             Name = name;
-        }
-
-        public string DisplayText => $"Counter '{Name}' clicked: {Count} times";
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            Count = 0;
         }
     }
 }
