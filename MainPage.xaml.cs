@@ -1,6 +1,6 @@
 namespace Counter
 {
-    public partial class MainPage : ContentPage
+    public partial class MainPage
     {
         public List<Counter> Counters { get; } = new List<Counter>();
 
