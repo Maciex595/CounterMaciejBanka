@@ -2,7 +2,7 @@ namespace Counter
 {
     public partial class MainPage
     {
-        private readonly string filePath = Path.Combine(FileSystem.AppDataDirectory, "counters.txt");
+        private string filePath = Path.Combine(FileSystem.AppDataDirectory, "counters.txt");
         public List<Counter> Counters { get; } = new List<Counter>();
 
         public MainPage()
