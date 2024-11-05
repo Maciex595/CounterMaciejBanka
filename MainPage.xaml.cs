@@ -2,7 +2,7 @@ namespace Counter
 {
     public partial class MainPage
     {
-
+        private readonly string filePath = Path.Combine(FileSystem.AppDataDirectory, "counters.txt");
         public List<Counter> Counters { get; } = new List<Counter>();
 
         public MainPage()
@@ -14,26 +14,25 @@ namespace Counter
 
         private void LoadCounters()
         {
-            var savedCounters = Preferences.Default.Get("counters", "");
-            if (!string.IsNullOrEmpty(savedCounters))
-            {
-                var counterStrings = savedCounters.Split(';');
-                foreach (var counterString in counterStrings)
+            if (File.Exists(filePath))
                 {
-                    var parts = counterString.Split(',');
-                    if (parts.Length == 2 && int.TryParse(parts[1], out int count))
+                var lines = File.ReadAllLines(filePath);
+                    foreach (var line in lines)
                     {
-                        Counters.Add(new Counter(parts[0], count));
+                        var parts = line.Split(',');
+                        if (parts.Length == 2 && int.TryParse(parts[1], out int count))
+                        {
+                            Counters.Add(new Counter(parts[0], count));
+                        }
                     }
                 }
-            }
         }
 
         private void SaveCounters()
         {
             var counterStrings = Counters.Select(c => $"{c.Name},{c.Count}");
-            var savedData = string.Join(";", counterStrings);
-            Preferences.Default.Set("counters", savedData);
+            File.WriteAllLines(filePath, counterStrings);
+           
         }
 
         private void OnAddCounterClicked(object sender, EventArgs e)
@@ -51,7 +50,7 @@ namespace Counter
 
                 Counters.Add(new Counter(name, startValue));
                 CounterNameEntry.Text = "";
-                InitialValueEntry.Text = ""; 
+                InitialValueEntry.Text = "";
                 UpdateListView();
                 SaveCounters();
             }
